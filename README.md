@@ -89,24 +89,35 @@ cd order-system
 ```
 
 2. Configure o `.env` ou arquivo de configuração com os dados do banco.
+3. Instale as dependências:
 
-3. Suba o RabbitMQ e o Mysql via Docker:
+```bash
+go mod tidy
+```
+4. Suba o RabbitMQ e o Mysql via Docker:
 
 ```bash
 docker-compose up -d
 ```
-4. Após subir o container crie a tabela orders no banco de dados:
+5. Após subir o container crie a tabela orders no banco de dados:
 
 ```sql
 CREATE TABLE orders (id varchar(255) NOT NULL, price float NOT NULL, tax float NOT NULL, final_price float NOT NULL, PRIMARY KEY (id))
 ```
 
-5. Execute a aplicação:
+6. Execute a aplicação:
 
 ```bash
 go run cmd/ordersystem/main.go wire_gen.go
 ```
 
+---
+## 🌐 Portas dos Serviços
+A aplicação responderá nas seguintes portas:  
+- **REST API**: http://localhost:8000
+- **gRPC**: Porta 50051
+- **GraphQL**: http://localhost:8080/graphql
+<hr></hr>
 ---
 
 ## 📊 Possibilidades de Expansão
