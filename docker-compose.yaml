@@ -1,6 +1,7 @@
-version: '3'
+version: '3.8'
 
 services:
+
   mysql:
     image: mysql:5.7
     container_name: mysql
@@ -10,7 +11,7 @@ services:
       MYSQL_DATABASE: orders
       MYSQL_PASSWORD: root
     ports:
-      - 3306:3306
+      - "3306:3306"
     volumes:
       - .docker/mysql:/var/lib/mysql
 
@@ -19,8 +20,41 @@ services:
     container_name: rabbitmq
     restart: always
     ports:
-      - 5672:5672
-      - 15672:15672
+      - "5672:5672"
+      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrated
+    container_name: migrate
+    depends_on:
+      - mysql
+    entrypoint: >
+      sh -c "
+        until nc -z mysql 3306;
+        do echo 'Aguardando MySQL...'; sleep 2; done;
+        migrate -path=/migrations -database 'mysql://root:root@tcp(mysql:3306)/orders' up
+      "
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ordersystem
+    command: >
+      sh -c "until nc -z rabbitmq 5672; do
+      echo 'Aguardando RabbitMQ...';
+      sleep 2;
+      done;
+      ./main"
+    depends_on:
+      - mysql
+      - rabbitmq
+    ports:
+      - "8000:8000"
+      - "50051:50051"
+      - "8080:8080"

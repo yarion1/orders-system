@@ -1,0 +1,7 @@
+# Dockerfile.migrate
+FROM migrate/migrate
+
+WORKDIR /migrations
+
+# Copia as migrations da sua máquina para o container
+COPY ./migrations /migrations
